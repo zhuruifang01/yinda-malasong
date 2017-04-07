@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+   
+    <script src="js/aihao.js"></script>
+    <script src="js/jquery-3.1.0.js"></script>
+    <script src="js/highcharts.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/exporting.js"></script>
+    
+    <script src="js/aihao.js"></script>
+    <script src="js/apiv1.3.min.js"></script>
+    <script src="js/Heatmap_min.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+    <script src="js/countup.js"></script>
+    <script src="js/index.js"></script>
+
+    <style>
+        #tagbox{
+            position: absolute;margin: 20px auto 0;
+            width: 300px; height: 250px;
+            right: 10px;
+            top:520px;
+        }
+    </style>
+</head>
+
+<body>
+<!--标题-->
+    <div class="header">
+        <div class="logo">
+                <img src="img/logo.png" alt=""/>
+                <p>中国郑开国际马拉松赛</p>
+        </div>
+        <div class="dxlogo">
+            <img src="img/dianxin.png" alt="">
+        </div>
+        <div class="title">
+            <img src="img/ml.png" alt="">
+        </div>
+        <div id="show"></div>
+    </div>
+<!--正文-->
+    <div class="nav">
+        <!--左-->
+       <div class="left">
+          <!--客流来源  -->
+          <div class="laiyuan">
+              <div class="logosmall"></div>
+              <div class="map"><img src="img/map.png" alt=""/></div>
+              <div id="container1"></div>
+          </div>
+          <!--TOP5 -->
+          <div class="tezheng">
+              <div class="logosmall"></div>
+              <div class="tu">
+                  <div id="container2"></div>
+                  <div class="zhushi">
+                      <img src="img/bz.png" alt="">
+                  </div>
+              </div>
+          </div>
+       </div>
+       <!--右 -->
+       <div class="right">
+            <!--客流监控-->
+            <div class="jiankong">
+                <div class="logosmall"></div>
+                <div class="table">
+                    <div>
+                        <ul class="place placefirst">
+                            <li>地点</li>
+                            <li class="people">人数</li>
+                        </ul>
+                        <ul class="place">
+                            <li>起点</li>
+                            <li class="people">10000</li>
+                        </ul>
+                        <ul class="place">
+                            <li>终点</li>
+                            <li class="people">10000</li>
+                        </ul>
+                        <ul class="place">
+                            <li>半程终点</li>
+                            <li class="people">10000</li>
+                        </ul>
+                        <ul class="place placelast">
+                            <li>迷你跑终点</li>
+                            <li class="people">10000</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="place placefirst">
+                            <li>地点</li>
+                            <li class="people">人数</li>
+                        </ul>
+                        <ul class="place">
+                            <li>组委会</li>
+                            <li class="people">10000</li>
+                        </ul>
+                        <ul class="place">
+                            <li>新闻中心</li>
+                            <li class="people">10000</li>
+                        </ul>
+                        <ul class="place">
+                            <li>郑开路段</li>
+                            <li class="people">10000</li>
+                        </ul>
+                        <ul class="place placelast">
+                            <li>中心路段</li>
+                            <li class="people">10000</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="img">
+                    <img src="img/xiao.png" alt="">
+                </div>
+                <div id="container4">
+                </div>
+            </div>
+            <!--客流喜好【环形标签云】-->
+            <div class="xihao">
+                <div class="logosmall"></div>
+            </div>
+       </div>
+      <!--离线地图-->
+       <div id="map">
+          <div class="ditu">
+              <div id="container" style="position:relative;overflow: hidden;">
+                  <iframe src="map/map.html" style="height:100%;width:100%;position:absolute;left:-5px;top:-5px;" frameborder="no" scrolling="no" ></iframe>
+              </div>
+          </div>
+          <div class="number">
+              <!--活动现场人数-->
+              <div class="wenzi">活动现场人数:</div>
+              <div id="myTargetElement" style="font-size:80px; font-family: arial;color:#fff;position:absolute;top:28px;left:40px;"></div>
+          </div>
+          <div class="jingao">
+              <img src="img/jingao.png" alt="">
+              <div class="note">&nbsp;&nbsp;2017-03-26 &nbsp; 10:00 &nbsp;&nbsp; 中心路段发生拥堵 &nbsp;&nbsp;请谨慎通行</div>
+          </div>
+       </div>
+
+    </div>
+    <!--【环形标签云】-->
+    <iframe src="test.html" id="tagbox" frameborder="no" scrolling="no" ></iframe>
+</div>
+</body>
+
+</html>

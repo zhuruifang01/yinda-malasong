@@ -1,0 +1,340 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>百度离线地图</title>
+    <script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="js/apiv1.3.min.js"></script>
+    <!--<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.3"></script>-->
+    <script type="text/javascript" src="js/TextIconOverlay_min.js"></script>
+    <script type="text/javascript" src="js/MarkerClusterer_min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bmap.css" />
+    <script type="text/javascript" src="js/points-sample-data.js"></script>
+    <script type="text/javascript" src="js/Heatmap_min.js"></script>
+</head>
+<body>
+    <div style="width: 100%; height: 100%; border: 1px solid gray" id="container"></div>
+</body>
+</html>
+<script type="text/javascript">
+
+    //设置地图高宽
+    function SetWidthAndHeight() {
+        var width = window.screen.width;
+        var height = window.screen.height;
+        $('#container').height(height - 140);
+        $('#container').width(width - 30);
+    }
+    SetWidthAndHeight();
+    var map = new BMap.Map("container", { mapType: BMAP_NORMAL_MAP });      //设置卫星图为底图
+    //map.centerAndZoom(new BMap.Point(120.409445, 36.105358), 6);     //设置地图中心点
+    //var point = new BMap.Point(113.42, 34.44);    // 创建点坐标 郑州
+    var point = new BMap.Point(114.01, 34.74);    // 创建点坐标 郑州
+    map.centerAndZoom(point,10);                     // 初始化地图,设置中心点坐标和地图级别。
+
+    //map.addControl(new BMap.MapTypeControl());
+    //map.addControl(new BMap.NavigationControl());
+    map.enableScrollWheelZoom(true);                  // 启用滚轮放大缩小。
+    map.enableKeyboard();                         // 启用键盘操作。  
+    //map.setCurrentCity("青岛");          // 设置地图显示的城市 此项是必须设置的
+
+    addMapControl(); //向地图添加控件
+
+    //setTimeout(function () {
+    //    getBoundary("河南省郑州市", "red", 1, "red", 0.1);
+    //}, 2000);
+
+    //标注 弹窗 提示文字
+    var marker = new BMap.Marker(point);  // 创建标注
+    map.addOverlay(marker);              // 将标注添加到地图中
+    addInfoWindow(marker, false, "click", 1, 5);
+    var label = new BMap.Label("5", { offset: new BMap.Size(20, -10) });
+    marker.setLabel(label);
+
+    //标注 弹窗 提示文字
+    var marker = new BMap.Marker(new BMap.Point(113.95387, 34.734984));  // 创建标注
+    map.addOverlay(marker);              // 将标注添加到地图中
+    addInfoWindow(marker, false, "click", 1,8);
+    var label = new BMap.Label("5", { offset: new BMap.Size(20, -10) });
+    marker.setLabel(label);
+
+    //跳动标注
+    var marker1 = new BMap.Marker(new BMap.Point(113.43, 34.45));  // 创建标注
+    map.addOverlay(marker1);
+    marker1.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+
+    var markers = [];
+    markers.push(marker);
+    markers.push(marker1);
+    var markerClusterer = new BMapLib.MarkerClusterer(map, { markers: markers });
+
+    //加载海量点
+    //if (document.createElement('canvas').getContext) {  // 判断当前浏览器是否支持绘制海量点
+    //    var points = [];  // 添加海量点数据
+    //    for (var i = 0; i < data.data.length; i++) {
+    //        points.push(new BMap.Point(data.data[i][0], data.data[i][1]));
+    //    }
+    //    var options = {
+    //        size: 3,
+    //        shape: 1,
+    //        color: '#d340c3'
+    //    }
+    //    var pointCollection = new BMap.PointCollection(points, options);  // 初始化PointCollection
+    //    pointCollection.addEventListener('click', function (e) {
+    //        alert('单击点的坐标为：' + e.point.lng + ',' + e.point.lat);  // 监听点击事件
+    //    });
+    //    map.addOverlay(pointCollection);  // 添加Overlay
+    //} else {
+    //    alert('请在chrome、safari、IE8+以上浏览器查看本示例');
+    //}
+
+    //地图控件添加函数：
+    function addMapControl() {
+        //向地图中添加缩放控件
+        var ctrl_nav = new BMap.NavigationControl({ anchor: BMAP_ANCHOR_TOP_LEFT, type: BMAP_NAVIGATION_CONTROL_LARGE });
+        map.addControl(ctrl_nav);
+        //向地图中添加缩略图控件
+        var ctrl_ove = new BMap.OverviewMapControl({ anchor: BMAP_ANCHOR_BOTTOM_RIGHT, isOpen: 1 });
+        map.addControl(ctrl_ove);
+        //向地图中添加比例尺控件
+        var ctrl_sca = new BMap.ScaleControl({ anchor: BMAP_ANCHOR_TOP_LEFT });
+        map.addControl(ctrl_sca);
+    }
+    //添加行政区域
+    function getBoundary(area, strokeColor, StrokeOpacity, fillColor, FillOpacity) {
+        var bdary = new BMap.Boundary();
+        bdary.get("河南省郑州市", function (rs) {       //获取行政区域
+            //map.clearOverlays();        //清除地图覆盖物       
+            var count = rs.boundaries.length; //行政区域的点有多少个
+            if (count === 0) {
+                alert('未能获取当前输入行政区域');
+                return;
+            }
+            var pointArray = [];
+            for (var i = 0; i < count; i++) {
+                var ply = new BMap.Polygon(rs.boundaries[i], { strokeWeight: 2, strokeColor: strokeColor, fillColor: fillColor }); //建立多边形覆盖物
+                ply.setStrokeOpacity(StrokeOpacity);
+                ply.setFillOpacity(FillOpacity);
+                map.addOverlay(ply);  //添加覆盖物
+                pointArray = pointArray.concat(ply.getPath());
+            }
+            //map.setViewport(pointArray);    //调整视野  
+            //addlabel();
+        });
+    }
+    //添加信息框
+    function addInfoWindow(marker, openState, hideType, name, tel, address) {
+        //openState(bool):是否默认打开
+        //hideType(string):窗口关闭方式
+        var opts = {
+            title: "",           // 信息窗口标题
+            width: 200,           // 信息窗口宽度
+            //height: 370,         // 信息窗口高度
+        }
+        var sContent = "<b>人数</b>：" + name + "</br>";
+        sContent += "<b>密度</b>：" + tel + "</br>";
+        var infoWindow = new BMap.InfoWindow(sContent, opts);  // 创建信息窗口对象
+        infoWindow.disableCloseOnClick();
+        if (hideType && hideType == "clickmap") {
+            infoWindow.enableCloseOnClick();
+        }
+        else if (hideType && hideType == "mouseout") {
+            marker.addEventListener("mouseout", function () { this.closeInfoWindow(); });
+        }
+        if (openState) {
+            marker.openInfoWindow(infoWindow); //开启信息窗口
+        }
+        marker.addEventListener("click", function () {
+            this.openInfoWindow(infoWindow);
+        });
+    }
+    //var geolocation = new BMap.Geolocation();
+    //	geolocation.getCurrentPosition(function(r){
+    //		if(this.getStatus() == 0){
+    //			var mk = new BMap.Marker(r.point);
+    //			map.addOverlay(mk);
+    //			map.panTo(r.point);
+    //			alert('您的位置：'+r.point.lng+','+r.point.lat);
+    //		}
+    //		else {
+    //			alert('failed'+this.getStatus());
+    //		}        
+    //	},{enableHighAccuracy: true})
+    //function myFun(result){
+    //		var cityName = result.name;
+    //		map.setCenter(cityName);
+    //		alert("当前定位城市:"+cityName);
+    //	}
+    //	var myCity = new BMap.LocalCity();
+    //	myCity.get(myFun);
+
+    // 用经纬度设置地图中心点
+    //	function theLocation(){
+    //longitude="121.21880";
+    //latitude="31.1738";
+    //		if(longitude!= "" && latitude != ""){
+    //			map.clearOverlays(); 
+    //			var new_point = new BMap.Point(document.getElementById("longitude").value,document.getElementById("latitude").value);
+    //			var marker = new BMap.Marker(new_point);  // 创建标注
+    //			map.addOverlay(marker);              // 将标注添加到地图中
+    //			map.panTo(new_point);      
+    //		}
+    //	}
+    var polyline = new BMap.Polyline([
+		new BMap.Point(113.42, 34.44),
+		new BMap.Point(113.43, 34.45),
+        new BMap.Point(113.44, 34.48),
+        new BMap.Point(113.49, 34.49)
+    ], { strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.5 });   //创建折线
+    map.addOverlay(polyline);   //增加折线
+
+
+
+
+    var points = [
+        //114.01, 34.74
+    { "lng": 114.010456, "lat": 34.734984, "count": 50 },
+    { "lng": 114.011332, "lat": 34.734984, "count": 51 },
+    { "lng": 114.012332, "lat": 34.734984, "count": 15 },
+    { "lng": 114.013332, "lat": 34.734984, "count": 40 },
+    { "lng": 114.014332, "lat": 34.734984, "count": 100 },
+    { "lng": 114.018332, "lat": 34.734984, "count": 60 },
+     { "lng": 114.010332, "lat": 34.734984, "count": 100 },
+     { "lng": 114.008332, "lat": 34.734984, "count": 60 },
+    { "lng": 114.000332, "lat": 34.734984, "count": 60 },
+    { "lng": 113.923332, "lat": 34.734984, "count": 98 },
+    { "lng": 113.933332, "lat": 34.734984, "count": 80 },
+    { "lng": 113.942039, "lat": 34.734984, "count": 81 },
+    { "lng": 113.95387, "lat": 34.734984, "count": 70 },
+    { "lng": 113.96773, "lat": 34.734984, "count": 42 },
+    { "lng": 113.971107, "lat": 34.734984, "count": 40 },
+    { "lng": 113.987521, "lat": 34.734984, "count": 27 },
+    { "lng": 113.999812, "lat": 34.920836, "count": 23 },
+    { "lng": 113.920682, "lat": 34.734984, "count": 60 },
+    { "lng": 113.415424, "lat": 34.924675, "count": 89 },
+    { "lng": 113.419242, "lat": 34.914509, "count": 15 },
+    { "lng": 113.422766, "lat": 34.921408, "count": 25 },
+    { "lng": 113.421674, "lat": 34.924396, "count": 21 },
+    { "lng": 113.427268, "lat": 34.92267, "count": 1 },
+    { "lng": 113.417721, "lat": 34.920034, "count": 51 },
+    { "lng": 113.412456, "lat": 34.92667, "count": 7 },
+    { "lng": 113.420432, "lat": 34.919114, "count": 11 },
+    { "lng": 113.425013, "lat": 34.921611, "count": 35 },
+    { "lng": 113.418733, "lat": 34.931037, "count": 22 },
+    { "lng": 113.419336, "lat": 34.931134, "count": 4 },
+    { "lng": 113.413557, "lat": 34.923254, "count": 5 },
+    { "lng": 113.418367, "lat": 34.92943, "count": 3 },
+    { "lng": 113.424312, "lat": 34.919621, "count": 100 },
+    { "lng": 113.423874, "lat": 34.919447, "count": 87 },
+    { "lng": 113.424225, "lat": 34.923091, "count": 32 },
+    { "lng": 113.417801, "lat": 34.921854, "count": 44 },
+    { "lng": 113.417129, "lat": 34.928227, "count": 21 },
+    { "lng": 113.426426, "lat": 34.922286, "count": 80 },
+    { "lng": 113.421597, "lat": 34.91948, "count": 32 },
+    { "lng": 113.423895, "lat": 34.920787, "count": 26 },
+    { "lng": 113.423563, "lat": 34.921197, "count": 17 },
+    { "lng": 113.417982, "lat": 34.922547, "count": 17 },
+    { "lng": 113.426126, "lat": 34.921938, "count": 25 },
+    { "lng": 113.42326, "lat": 34.915782, "count": 100 },
+    { "lng": 113.419239, "lat": 34.916759, "count": 39 },
+    { "lng": 113.417185, "lat": 34.929123, "count": 11 },
+    { "lng": 113.417237, "lat": 34.927518, "count": 9 },
+    { "lng": 113.417784, "lat": 34.915754, "count": 47 },
+    { "lng": 113.420193, "lat": 34.917061, "count": 52 },
+    { "lng": 113.422735, "lat": 34.915619, "count": 100 },
+    { "lng": 113.418495, "lat": 34.915958, "count": 46 },
+    { "lng": 113.416292, "lat": 34.931166, "count": 9 },
+    { "lng": 113.419916, "lat": 34.924055, "count": 8 },
+    { "lng": 113.42189, "lat": 34.921308, "count": 11 },
+    { "lng": 113.413765, "lat": 34.929376, "count": 3 },
+    { "lng": 113.418232, "lat": 34.920348, "count": 50 },
+    { "lng": 113.417554, "lat": 34.930511, "count": 15 },
+    { "lng": 113.418568, "lat": 34.918161, "count": 23 },
+    { "lng": 113.413461, "lat": 34.926306, "count": 3 },
+    { "lng": 113.42232, "lat": 34.92161, "count": 13 },
+    { "lng": 113.4174, "lat": 34.928616, "count": 6 },
+    { "lng": 113.424679, "lat": 34.915499, "count": 21 },
+    { "lng": 113.42171, "lat": 34.915738, "count": 29 },
+    { "lng": 113.417836, "lat": 34.916998, "count": 99 },
+    { "lng": 113.420755, "lat": 34.928001, "count": 10 },
+    { "lng": 113.414077, "lat": 34.930655, "count": 14 },
+    { "lng": 113.426092, "lat": 34.922995, "count": 16 },
+    { "lng": 113.41535, "lat": 34.931054, "count": 15 },
+    { "lng": 113.413022, "lat": 34.921895, "count": 13 },
+    { "lng": 113.415551, "lat": 34.913373, "count": 17 },
+    { "lng": 113.421191, "lat": 34.926572, "count": 1 },
+    { "lng": 113.419612, "lat": 34.917119, "count": 9 },
+    { "lng": 113.418237, "lat": 34.921337, "count": 54 },
+    { "lng": 113.423776, "lat": 34.921919, "count": 26 },
+    { "lng": 113.417694, "lat": 34.92536, "count": 17 },
+    { "lng": 113.415377, "lat": 34.914137, "count": 19 },
+    { "lng": 113.417434, "lat": 34.914394, "count": 43 },
+    { "lng": 113.42588, "lat": 34.922622, "count": 27 },
+    { "lng": 113.418345, "lat": 34.919467, "count": 8 },
+    { "lng": 113.426883, "lat": 34.917171, "count": 3 },
+    { "lng": 113.423877, "lat": 34.916659, "count": 34 },
+    { "lng": 113.415712, "lat": 34.915613, "count": 14 },
+    { "lng": 113.419869, "lat": 34.931416, "count": 12 },
+    { "lng": 113.416956, "lat": 34.925377, "count": 11 },
+    { "lng": 113.42066, "lat": 34.925017, "count": 38 },
+    { "lng": 113.416244, "lat": 34.920215, "count": 91 },
+    { "lng": 113.41929, "lat": 34.915908, "count": 54 },
+    { "lng": 113.422116, "lat": 34.919658, "count": 21 },
+    { "lng": 113.4183, "lat": 34.925015, "count": 15 },
+    { "lng": 113.421969, "lat": 34.913527, "count": 3 },
+    { "lng": 113.422936, "lat": 34.921854, "count": 24 },
+    { "lng": 113.41905, "lat": 34.929217, "count": 12 },
+    { "lng": 113.424579, "lat": 34.914987, "count": 57 },
+    { "lng": 113.42076, "lat": 34.915251, "count": 70 },
+    { "lng": 113.425867, "lat": 34.918989, "count": 8 }];
+
+    if (!isSupportCanvas()) {
+        alert('热力图目前只支持有canvas支持的浏览器,您所使用的浏览器不能使用热力图功能~')
+    }
+    //详细的参数,可以查看heatmap.js的文档 https://github.com/pa7/heatmap.js/blob/master/README.md
+    //参数说明如下:
+    /* visible 热力图是否显示,默认为true
+     * opacity 热力的透明度,1-100
+     * radius 势力图的每个点的半径大小   
+     * gradient  {JSON} 热力图的渐变区间 . gradient如下所示
+     *	{
+			.2:'rgb(0, 255, 255)',
+			.5:'rgb(0, 110, 255)',
+			.8:'rgb(100, 0, 255)'
+		}
+		其中 key 表示插值的位置, 0~1. 
+		    value 为颜色值. 
+     */
+    heatmapOverlay = new BMapLib.HeatmapOverlay({ "radius": 20 });
+    map.addOverlay(heatmapOverlay);
+    heatmapOverlay.setDataSet({ data: points, max: 100 });
+    //是否显示热力图
+    function openHeatmap() {
+        heatmapOverlay.show();
+    }
+    function closeHeatmap() {
+        heatmapOverlay.hide();
+    }
+    closeHeatmap();
+    openHeatmap();
+    function setGradient() {
+        /*格式如下所示:
+		{
+	  		0:'rgb(102, 255, 0)',
+	 	 	.5:'rgb(255, 170, 0)',
+		  	1:'rgb(255, 0, 0)'
+		}*/
+        var gradient = {};
+        var colors = document.querySelectorAll("input[type='color']");
+        colors = [].slice.call(colors, 0);
+        colors.forEach(function (ele) {
+            gradient[ele.getAttribute("data-key")] = ele.value;
+        });
+        heatmapOverlay.setOptions({ "gradient": gradient });
+    }
+    //判断浏览区是否支持canvas
+    function isSupportCanvas() {
+        var elem = document.createElement('canvas');
+        return !!(elem.getContext && elem.getContext('2d'));
+    }
+</script>
